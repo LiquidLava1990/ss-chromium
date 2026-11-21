@@ -1249,13 +1249,14 @@ describe("response limits", () => {
 
 describe("idle release", () => {
   it("releases tabs idle longer than idleReleaseMs and claims them again on use", async () => {
-    const idle = await startHarness({ idleReleaseMs: 300 });
+    // Wide enough that a slow CI runner still checks the claim before the idle timer fires
+    const idle = await startHarness({ idleReleaseMs: 2000 });
     try {
       const s = idle.openSession();
       await idle.run(s, `goto ${idle.fixtures.url("/misc")}`);
       const tabId = Number(/\* (\d+)/.exec(await idle.run(s, "tab list"))?.[1]);
       expect(idle.backend.isClaimed(tabId)).toBe(true);
-      await new Promise((r) => setTimeout(r, 700));
+      await new Promise((r) => setTimeout(r, 3000));
       expect(idle.backend.isClaimed(tabId)).toBe(false);
       expect(await idle.run(s, "get title")).toContain("Misc");
       expect(idle.backend.isClaimed(tabId)).toBe(true);
