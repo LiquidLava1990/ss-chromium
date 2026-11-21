@@ -40,4 +40,6 @@ for (const { from, to } of parts) {
     filter: (source) => !source.split(path.sep).includes("__pycache__"),
   });
 }
-console.log("Assembled server/, extension/, skill/, visual/ and license files.");
+console.log(
+  "Assembled server/, extension/, skill/, visual/ and license files.",
+);
