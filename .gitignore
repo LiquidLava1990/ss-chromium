@@ -8,3 +8,5 @@ test-results/
 playwright-report/
 release/
 *.tgz
+__pycache__/
+packages/ss-chromium/visual/

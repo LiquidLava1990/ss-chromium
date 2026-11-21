@@ -52,3 +52,11 @@ session's tabs and rejects other sessions' tab IDs.
 If `SS_CHROMIUM_VISION_URL` is configured, `ss-chromium vision <screenshot> "<question>"`
 describes an image (charts, canvas content, images without text). Treat the answer as a hint
 and verify against the page.
+
+For a visual challenge or other image requiring closer inspection, start with a fresh
+viewport screenshot. The optional visual helpers (`packages/mcp/visual` in the source
+checkout, or `visual` beside `skill` in the npm package) can compare a cropped
+shape with a screenshot or analyze ordered frames through the locally running CrawlRX
+vision adapter; see that directory's README for dependencies and commands. Frame analysis
+is a hint, not proof of motion or challenge acceptance. For CAPTCHA and bot walls, follow
+the human hand-off instructions above.

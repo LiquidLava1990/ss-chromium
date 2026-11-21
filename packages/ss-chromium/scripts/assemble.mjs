@@ -22,6 +22,10 @@ const parts = [
     from: path.join(repo, "skills", "ss-chromium", "SKILL.md"),
     to: path.join(here, "skill", "SKILL.md"),
   },
+  {
+    from: path.join(repo, "packages", "mcp", "visual"),
+    to: path.join(here, "visual"),
+  },
 ];
 for (const { from, to } of parts) {
   if (!existsSync(from)) {
@@ -31,6 +35,9 @@ for (const { from, to } of parts) {
     process.exit(1);
   }
   rmSync(to, { recursive: true, force: true });
-  cpSync(from, to, { recursive: true });
+  cpSync(from, to, {
+    recursive: true,
+    filter: (source) => !source.split(path.sep).includes("__pycache__"),
+  });
 }
-console.log("Assembled server/, extension/, skill/ and license files.");
+console.log("Assembled server/, extension/, skill/, visual/ and license files.");
