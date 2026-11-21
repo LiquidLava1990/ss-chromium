@@ -21,6 +21,7 @@ import {
 } from "@/commands/actions";
 import { sendCdp, subscribe } from "@/commands/cdp";
 import { HIDDEN_TAB_MESSAGE, hiddenTabs } from "@/commands/hidden-tabs";
+import { detectHumanCheck, humanCheckNote } from "@/commands/human-check";
 import {
   cap,
   capTail,
@@ -125,6 +126,17 @@ export type CommandDef = {
 };
 
 export const TIMEOUT_MAX_MS = 60_000;
+/** How long `human-check --wait` may wait for the user at most */
+export const HUMAN_CHECK_WAIT_MAX_MS = 300_000;
+
+function humanCheckWaitMs(args: ParsedArgs): number {
+  const value = args.flags.timeout;
+  if (value === undefined || value === true) return TIMEOUT_MAX_MS;
+  const ms = Number(value);
+  if (!Number.isFinite(ms) || ms < 0)
+    throw new StepError("--timeout takes milliseconds");
+  return Math.min(ms, HUMAN_CHECK_WAIT_MAX_MS);
+}
 
 function positional(args: ParsedArgs, index: number, what: string): string {
   const token = args.positional[index];
@@ -509,6 +521,44 @@ export const COMMANDS: CommandDef[] = [
       if (!(await waitForLoad(page))) ctx.note("the page is still loading");
       if (page.url() !== url && page.url() !== `${url}/`)
         ctx.note(`→ ${page.url()}`);
+      const humanCheck = await detectHumanCheck(page);
+      if (humanCheck) ctx.note(humanCheckNote(humanCheck));
+    },
+  },
+  {
+    name: "human-check",
+    usage: "human-check [--wait] [--timeout <ms>]",
+    help: `Reports whether the page shows a CAPTCHA or bot wall (reCAPTCHA, hCaptcha, Cloudflare, Turnstile, DataDome, Arkose, GeeTest, PerimeterX, AWS WAF). It never solves one: hand it to the user. --wait pauses until the user has cleared it (default 60 s, up to ${HUMAN_CHECK_WAIT_MAX_MS / 1000} s; repeat to keep waiting).`,
+    flags: { wait: false, timeout: true },
+    maxArgs: 0,
+    timeoutMs: (args) =>
+      args.flags.wait ? humanCheckWaitMs(args) + 5_000 : undefined,
+    async run(ctx) {
+      const page = await ctx.page();
+      const found = await detectHumanCheck(page);
+      if (!ctx.args.flags.wait) {
+        ctx.print(
+          found
+            ? `human check: ${found}. Ask the user to complete it.`
+            : "no human check detected",
+        );
+        return;
+      }
+      if (!found) {
+        ctx.print("no human check detected");
+        return;
+      }
+      const timeout = humanCheckWaitMs(ctx.args);
+      const deadline = Date.now() + timeout;
+      while (await detectHumanCheck(page)) {
+        if (Date.now() >= deadline)
+          throw new StepError(
+            `The ${found} check is still there after ${timeout / 1000} s. The user has not completed it yet: ask them again, then run human-check --wait`,
+          );
+        await sleep(500);
+      }
+      await waitForLoad(page);
+      ctx.print(`human check cleared → ${page.url()}`);
     },
   },
   ...(["back", "forward", "reload"] as const).map((name): CommandDef => ({

@@ -35,6 +35,7 @@ export const MORE_COMMANDS = [
   "pdf",
   "dialog",
   "fedcm",
+  "human-check",
   "console",
   "requests",
   "request",

@@ -192,6 +192,11 @@ const TESTS: Record<string, string> = {
     "Opener",
     `<a href="/form" target="_blank">Open form</a><button onclick="window.open('/list')">Open list</button>`,
   ),
+  // A bot wall as a human-check provider would show it (no real provider is contacted)
+  "/human-check": page(
+    "Just a moment...",
+    `<h1>Checking your browser</h1><div class="cf-turnstile" data-sitekey="test"></div>`,
+  ),
   "/misc": page(
     "Misc",
     `<h1>Misc</h1><button data-testid="save" onclick="this.textContent='Saved'">Save</button><button>Item</button><button>Item</button><button>Item</button>

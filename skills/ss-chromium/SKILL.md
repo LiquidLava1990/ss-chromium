@@ -41,8 +41,11 @@ session's tabs and rejects other sessions' tab IDs.
 - After an uncertain submission, inspect the page instead of replaying the action. A reconnect
   is not proof that it completed. Crash recovery restores tabs, never clicks or submissions.
 - Never reveal passwords. Follow the user's and the site's rules; do not try to get around
-  CAPTCHAs, bot checks or access controls. If a site asks for human verification, hand it to
-  the user.
+  CAPTCHAs, bot checks or access controls.
+- CAPTCHAs and bot walls: `goto` notes when a page shows one, and `human-check` reports it on
+  demand. Never click or solve it. Ask the user to complete it in the SS Chromium window, run
+  `human-check --wait` (it pauses up to 60 s, or `--timeout` up to 300000 ms; repeat if the
+  user needs longer), then continue from the page the site lets through.
 
 ## Optional vision
 

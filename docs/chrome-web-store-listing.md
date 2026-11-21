@@ -9,7 +9,7 @@ SS Browser Control - Browser Automation for AI Agents (MCP)
 
 ## Summary / short description (manifest, ≤132 characters)
 
-Browser automation for AI agents: let Claude Code, Codex and any MCP client control this browser locally. No cloud, no account.
+AI browser automation: Claude Code, Codex & any MCP client drive this browser locally. CAPTCHAs are handed to you. No cloud.
 
 ## Category
 
@@ -35,8 +35,14 @@ Features
 • Browser automation for AI agents over the Model Context Protocol (MCP)
 • Works with Claude Code, Codex, Cursor, VS Code and any MCP client
 • Agents get their own tabs and never see the others; one Stop button cuts them all off
-• Page snapshots, text extraction, clicks, typing, dropdowns, file uploads, drag and drop,
-dialogs, screenshots and PDFs
+• Page snapshots, text extraction, clicks, typing, dropdowns, checkboxes, hover, scrolling,
+file uploads, drag and drop, dialogs, screenshots, PDFs and downloads
+• Follows popups and OAuth windows, and drives the browser's own account chooser
+("Sign in with Google" via FedCM)
+• CAPTCHA and bot-wall hand-off: detects reCAPTCHA, hCaptcha, Cloudflare/Turnstile and other
+checks, pauses the agent and asks you to complete them, then lets the agent continue. It
+never solves or bypasses them.
+• Optional image description for agents through a local vision service (such as CrawlRX)
 • Runs entirely on your computer: the extension talks only to the local server on 127.0.0.1
 
 Privacy
@@ -51,7 +57,7 @@ Open source (Apache-2.0): https://github.com/LiquidLava1990/ss-chromium
 
 browser automation, AI agent, MCP, Model Context Protocol, Claude, Claude Code, Codex, Cursor,
 web automation, Chrome extension, Chromium, Playwright alternative, Puppeteer alternative,
-AI browser control, form filling, web testing
+AI browser control, form filling, file upload, screenshots, human in the loop, web testing
 
 ## Permission justifications
 

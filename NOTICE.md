@@ -17,7 +17,9 @@ Changes from Browser MCP, summarized (see the git history for detail):
 - Conversation-scoped windows: each MCP conversation key gets its own window and tabs; all
   windows share one profile. Ownership survives reconnects, restarts and browser crashes.
 - Additional commands: `point` (viewport-relative input), `tab popup`, `drop` (file and MIME
-  drops, optionally as native Chromium drag events) and `fedcm` (browser account choosers).
+  drops, optionally as native Chromium drag events), `fedcm` (browser account choosers) and
+  `human-check` (detects CAPTCHAs and bot walls and waits while the user completes them; it
+  never solves them).
 - Optional image description through an external vision service (`SS_CHROMIUM_VISION_URL`).
 
 Third-party code adapted in these changes is listed in THIRD_PARTY_NOTICES.md.

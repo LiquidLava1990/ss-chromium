@@ -1,7 +1,7 @@
 {
   "name": "ss-chromium",
   "version": "1.0.0",
-  "description": "Browser automation for AI agents: MCP server + Chromium extension that lets Claude Code, Codex and any MCP client drive a local browser",
+  "description": "Browser automation for AI agents: MCP server + Chromium extension so Claude Code, Codex and any MCP client drive a real local browser (forms, uploads, screenshots, CAPTCHA hand-off)",
   "license": "Apache-2.0",
   "type": "module",
   "repository": {
@@ -31,7 +31,14 @@
     "puppeteer-alternative",
     "headless-browser",
     "web-scraping",
-    "agentic"
+    "agentic",
+    "human-in-the-loop",
+    "form-filling",
+    "file-upload",
+    "screenshot",
+    "fedcm",
+    "web-agent",
+    "crawlrx"
   ],
   "bin": {
     "ss-chromium": "bin/ss-chromium.mjs"
@@ -49,7 +56,8 @@
   "scripts": {
     "build": "node scripts/assemble.mjs",
     "test": "node --test \"test/*.test.mjs\"",
-    "e2e": "node scripts/e2e.mjs"
+    "e2e": "node scripts/e2e.mjs",
+    "stress": "node scripts/stress.mjs"
   },
   "engines": {
     "node": ">=20.11"

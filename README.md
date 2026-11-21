@@ -3,13 +3,49 @@
 **SS Chromium lets AI coding agents such as Claude Code, Codex, Cursor and any MCP client control
 a real Chromium browser on your computer.** It is an open-source MCP server, a Chrome/Chromium
 extension and a one-line installer: agents navigate, read pages, click, type, fill forms, upload
-files and take screenshots, while you stay signed in once in a shared local profile. Each AI
+files, follow popups and sign-in choosers, and take screenshots and PDFs, while you stay signed
+in once in a shared local profile. When a site shows a CAPTCHA or bot wall, SS Chromium detects
+it, pauses the agent and hands it to you, then continues once you have cleared it. Each AI
 conversation gets its own browser window and tabs. Everything runs locally on loopback: no cloud
 relay, no account, no telemetry. A local alternative to driving Playwright or Puppeteer by hand.
 
 - **Works with**: Claude Code, Claude Desktop, Codex, Cursor, VS Code, any Model Context Protocol client
 - **Platforms**: Windows, macOS, Linux
 - **License**: Apache-2.0, based on [Browser MCP](https://github.com/BrowserMCP/mcp) (see [NOTICE.md](NOTICE.md))
+
+## Features
+
+- **Real browser control for AI agents**: a real, visible Chromium (or your own Chrome, Edge or
+  Brave), not a headless scraper. Agents navigate, go back and forward, reload and work with
+  pages you can watch.
+- **One window per conversation, one shared signed-in profile**: sign in once and every agent
+  reuses the cookies and logins, while each conversation sees only its own tabs. Windows and
+  tabs survive reconnects, MCP restarts and browser crashes (submissions are never replayed).
+- **Tabs, popups and dialogs**: open, list, select and close tabs; follow popups and OAuth
+  windows (`tab popup`); answer alert, confirm and prompt dialogs.
+- **Forms and input**: fill, type, press keys, select dropdowns, check boxes, click, hover,
+  scroll, drag, and viewport-relative `point` input for canvas apps. Works across iframes and
+  shadow DOM.
+- **File uploads and drops**: set file inputs, and drop files or MIME data onto drop zones
+  (optionally as native Chromium drag events).
+- **Efficient page reading**: accessibility snapshots with element refs, text search, and
+  `get text` / values / attributes, sized for an LLM context window.
+- **Screenshots, PDFs and downloads**: viewport, element or full-page screenshots; save pages as
+  PDF; capture downloads.
+- **Debugging**: console errors, network requests and response bodies, `eval` in the page.
+- **Sign-in helpers**: drives Chromium's native account chooser (FedCM, such as "Sign in with
+  Google") with `fedcm list`, `fedcm select` and `fedcm click`.
+- **CAPTCHA and bot-wall hand-off**: detects reCAPTCHA, hCaptcha, Cloudflare challenges and
+  Turnstile, DataDome, Arkose Labs, GeeTest, PerimeterX and AWS WAF checks and tells the agent to
+  stop and ask you; `human-check --wait` then pauses until you have completed the check in the
+  window, and the agent continues. It never solves or bypasses them.
+- **Optional vision**: describe screenshots (charts, canvas content, images) through a
+  [CrawlRX](https://github.com/LiquidLava1990/crawlrx) vision endpoint or any compatible service.
+- **MCP for every client**: Claude Code, Claude Desktop, Codex, Cursor, VS Code and any Model
+  Context Protocol client; a bundled Claude skill teaches agents the workflow.
+- **Local and private**: loopback only, signed daemon identity, no account, no telemetry.
+- **Easy deployment**: one-line installers for Windows, macOS and Linux, `npx`, or the
+  extension zip for "Load unpacked".
 
 ## Install in one line (Quick start)
 
@@ -80,7 +116,8 @@ The server exposes one tool, `browser`, that takes a batch of commands:
   same window and tabs after a restart; different conversations must use different keys.
   The bundled skill tells agents how to pick one.
 - Commands include `goto`, `snapshot`, `find`, `get text`, `click`, `fill`, `type`, `press`,
-  `select`, `upload`, `drop`, `scroll`, `drag`, `point`, `tab`, `dialog`, `fedcm`,
+  `select`, `check`, `hover`, `upload`, `drop`, `scroll`, `drag`, `point`, `tab`, `dialog`,
+  `fedcm`, `human-check`, `wait`,
   `screenshot`, `pdf`, `download`, `console`, `requests` and `eval`. Run `help` for the syntax.
 - Open the shared browser yourself (for example, to sign in to a site once) with
   `ss-chromium launch`.
@@ -117,11 +154,17 @@ The extension talks only to the SS Chromium daemon on `127.0.0.1`. It verifies t
 signature on every connection, and agents can only reach the tabs of their own conversation.
 Press **Stop** in the popup to cut off all agents.
 
-## Privacy and safety: what it will not do
+## CAPTCHAs and bot walls: detect, hand to you, continue
 
-SS Chromium is for driving your own browser on your behalf. It contains no CAPTCHA solving, no
-bot-detection evasion and no fingerprint spoofing, and the bundled skill tells agents to hand
-human-verification steps to you.
+When a page shows a human-verification check, SS Chromium notices it (right after `goto`, or on
+demand with `human-check`) and tells the agent not to touch it but to ask you. You complete the
+check in the visible SS Chromium window; `human-check --wait` pauses the agent (up to 5 minutes
+per call) until the check is gone, and the agent carries on from the page the site lets through.
+Because the profile is shared and persistent, a check you clear once often stays cleared for
+later agents.
+
+SS Chromium is for driving your own browser on your behalf. It contains **no automated CAPTCHA
+solving, no bot-detection evasion and no fingerprint spoofing**.
 
 ## Optional vision (image description) for agents
 
@@ -178,6 +221,7 @@ pnpm install
 pnpm build          # server, extension, and the ss-chromium package
 pnpm test           # unit and integration tests
 pnpm --filter ss-chromium e2e   # installs Chromium in a temp folder and drives a page over MCP
+pnpm --filter ss-chromium stress -- 1   # multi-session stress run (20 cases per round; see the script header)
 pnpm zip:extension  # release zip for "Load unpacked"
 pnpm zip:store      # Chrome Web Store upload (no manifest key)
 ```

@@ -25,7 +25,7 @@ export default defineConfig({
     name: "SS Browser Control - Browser Automation for AI Agents (MCP)",
     short_name: "SS Control",
     description:
-      "Browser automation for AI agents: let Claude Code, Codex and any MCP client control this browser locally. No cloud, no account.",
+      "AI browser automation: Claude Code, Codex & any MCP client drive this browser locally. CAPTCHAs are handed to you. No cloud.",
     // The Chrome Web Store refuses a manifest `key`; its listing gets the same ID from the private key on first upload
     ...(process.env.SS_STORE_BUILD === "1" ? {} : { key: EXTENSION_KEY }),
     // `debugger` relays the daemon's CDP commands to the tabs agents use, `tabs` reports their URLs and titles, `tabGroups` makes each AI app's tab group, `webNavigation` finds tabs that pages open, `alarms` runs the connection's watchdog and `storage` keeps the extension's state. `<all_urls>` lets `scripting` and the content script (`frames.content.ts`, idle until asked) remove other extensions' frames (a password manager's inline menu), which block `debugger.attach()`
