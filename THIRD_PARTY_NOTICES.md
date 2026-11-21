@@ -3,6 +3,13 @@
 SS Chromium is a modified Apache-2.0 version of BrowserMCP/mcp; see LICENSE
 and NOTICE.md for the base revision and the modifications.
 
+## PuzzleCaptchaSolver
+
+The `shape_match.py` image template matcher is adapted from
+[PuzzleCaptchaSolver](https://github.com/vsmutok/PuzzleCaptchaSolver) by Vasyl Smutok.
+Its MIT license and copyright notice ship beside the matcher in
+`PUZZLE_CAPTCHA_LICENSE.txt`.
+
 ## Microsoft Playwright
 
 Copyright (c) Microsoft Corporation. Licensed under the Apache License,
