@@ -1,0 +1,10 @@
+node_modules
+dist
+.output/
+.wxt
+.env*
+coverage
+test-results/
+playwright-report/
+release/
+*.tgz

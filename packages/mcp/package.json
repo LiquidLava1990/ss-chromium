@@ -1,0 +1,45 @@
+{
+  "name": "@browsermcp/mcp",
+  "version": "2.5.1-ss.7",
+  "description": "SS Chromium MCP server and daemon (bundled into the ss-chromium package; based on Browser MCP)",
+  "author": "SS Chromium contributors; based on Browser MCP",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/LiquidLava1990/ss-chromium",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LiquidLava1990/ss-chromium.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": "https://github.com/LiquidLava1990/ss-chromium/issues",
+  "type": "module",
+  "bin": {
+    "mcp-server-browsermcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsup && shx chmod +x dist/index.js",
+    "prepare": "npm run build",
+    "watch": "tsup --watch",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "commander": "^14.0.1",
+    "playwright-core": "1.65.0",
+    "ws": "^8.18.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@browsermcp/protocol": "workspace:*",
+    "@types/node": "^24.19.2",
+    "@types/ws": "^8.18.1",
+    "shx": "^0.4.0",
+    "tsup": "^8.5.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  },
+  "private": true
+}
