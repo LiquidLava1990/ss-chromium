@@ -1,0 +1,56 @@
+name: Release
+
+# Push a tag like v1.0.0 to build the release assets. The GitHub release is created as a
+# draft for review; npm publishing runs only when the NPM_TOKEN secret is set.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm and Node
+        uses: pnpm/setup@v3
+        with:
+          cache: true
+          require-lockfile: true
+
+      - run: pnpm build
+      - run: pnpm --filter ss-chromium test
+
+      - name: Extension zips (Load unpacked + Chrome Web Store)
+        run: |
+          pnpm zip:extension
+          pnpm zip:store
+
+      - name: npm package
+        run: |
+          mkdir -p release
+          cd packages/ss-chromium && pnpm pack --pack-destination ../../release
+          cd ../../release && cp ss-chromium-*.tgz ss-chromium.tgz
+
+      - name: Draft GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --draft --generate-notes --title "SS Chromium $GITHUB_REF_NAME" \
+            release/ss-chromium.tgz release/ss-chromium-*.tgz \
+            apps/extension/.output/ss-browser-control-*-chrome.zip \
+            apps/extension/.output/ss-browser-control-*-chrome-web-store.zip \
+            install/install.ps1 install/install.sh
+
+      - name: Publish to npm
+        if: ${{ env.NPM_TOKEN != '' }}
+        run: |
+          npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          npm publish release/ss-chromium.tgz --access public --provenance

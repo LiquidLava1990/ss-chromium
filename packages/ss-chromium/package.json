@@ -1,0 +1,68 @@
+{
+  "name": "ss-chromium",
+  "version": "1.0.0",
+  "description": "Browser automation for AI agents: MCP server + Chromium extension that lets Claude Code, Codex and any MCP client drive a local browser",
+  "license": "Apache-2.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LiquidLava1990/ss-chromium.git",
+    "directory": "packages/ss-chromium"
+  },
+  "homepage": "https://github.com/LiquidLava1990/ss-chromium#readme",
+  "bugs": "https://github.com/LiquidLava1990/ss-chromium/issues",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "browser-automation",
+    "web-automation",
+    "chrome-extension",
+    "chromium",
+    "chrome",
+    "ai-agent",
+    "ai-agents",
+    "claude",
+    "claude-code",
+    "codex",
+    "llm",
+    "browser-control",
+    "playwright-alternative",
+    "puppeteer-alternative",
+    "headless-browser",
+    "web-scraping",
+    "agentic"
+  ],
+  "bin": {
+    "ss-chromium": "bin/ss-chromium.mjs"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "server",
+    "extension",
+    "skill",
+    "LICENSE",
+    "NOTICE.md",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node scripts/assemble.mjs",
+    "test": "node --test \"test/*.test.mjs\"",
+    "e2e": "node scripts/e2e.mjs"
+  },
+  "engines": {
+    "node": ">=20.11"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "commander": "^14.0.1",
+    "playwright-core": "1.65.0",
+    "ws": "^8.18.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@browsermcp/extension": "workspace:*",
+    "@browsermcp/mcp": "workspace:*"
+  }
+}
