@@ -276,7 +276,44 @@ describe("optional vision", () => {
         await describeImage(image, "describe", { SS_CHROMIUM_VISION_URL: url }),
         "a bar chart",
       );
-      assert.deepEqual(received, { image: "AQID", prompt: "describe" });
+      assert.deepEqual(received, {
+        image: "AQID",
+        image_base64: "AQID",
+        prompt: "describe",
+      });
+    } finally {
+      server.close();
+    }
+  });
+  it("speaks CrawlRX's /vision/analyze contract", async () => {
+    const image = path.join(temp(), "shot.png");
+    writeFileSync(image, Buffer.from([1, 2, 3]));
+    const answers = [
+      { success: true, text: "a login form", model: "m", elapsed_ms: 5 },
+      { success: false, text: "", error: "No model server" },
+    ];
+    const server = createServer((request, response) => {
+      let body = "";
+      request.on("data", (chunk) => (body += chunk));
+      request.on("end", () => {
+        // CrawlRX rejects a request without image_base64 (HTTP 422).
+        const ok = JSON.parse(body).image_base64 === "AQID";
+        response.writeHead(ok ? 200 : 422, {
+          "Content-Type": "application/json",
+        });
+        response.end(JSON.stringify(ok ? answers.shift() : {}));
+      });
+    });
+    await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+    try {
+      const env = {
+        SS_CHROMIUM_VISION_URL: `http://127.0.0.1:${server.address().port}/vision/analyze`,
+      };
+      assert.equal(await describeImage(image, "describe", env), "a login form");
+      await assert.rejects(
+        describeImage(image, "describe", env),
+        /No model server/,
+      );
     } finally {
       server.close();
     }

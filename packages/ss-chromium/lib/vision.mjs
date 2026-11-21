@@ -20,8 +20,23 @@ export function visionEndpoint(env = process.env) {
 }
 
 /**
+ * The answer text from either supported response shape, or null.
+ * `{ ok: true, analysis }` (generic) or CrawlRX's `{ success: true, text }`.
+ * @param {any} result
+ * @returns {string | null}
+ */
+export function visionAnswer(result) {
+  if (result?.ok === true && typeof result.analysis === "string")
+    return result.analysis;
+  if (result?.success === true && typeof result.text === "string")
+    return result.text;
+  return null;
+}
+
+/**
  * Sends a screenshot and a question to the vision service.
- * Request: POST JSON `{ image: <base64>, prompt }`. Response: JSON `{ ok: true, analysis: string }`.
+ * Request: POST JSON `{ image, image_base64, prompt }` (the same base64 under both names, so CrawlRX's
+ * `/vision/analyze` and generic services both accept it). Response: see `visionAnswer`.
  * @param {string} imageFile
  * @param {string} prompt
  * @param {NodeJS.ProcessEnv} env
@@ -33,13 +48,11 @@ export async function describeImage(imageFile, prompt, env = process.env) {
     throw new Error(
       "Vision is off. Set SS_CHROMIUM_VISION_URL to a vision service (for example a CrawlRX vision endpoint) to use it.",
     );
+  const image = readFileSync(imageFile).toString("base64");
   const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      image: readFileSync(imageFile).toString("base64"),
-      prompt,
-    }),
+    body: JSON.stringify({ image, image_base64: image, prompt }),
     signal: AbortSignal.timeout(VISION_TIMEOUT_MS),
   });
   if (!response.ok)
@@ -47,9 +60,12 @@ export async function describeImage(imageFile, prompt, env = process.env) {
       `The vision service at ${endpoint.origin} answered HTTP ${response.status}`,
     );
   const result = await response.json();
-  if (result?.ok !== true || typeof result.analysis !== "string")
+  const answer = visionAnswer(result);
+  if (answer === null)
     throw new Error(
-      "The vision service returned an unexpected response; it must answer { ok: true, analysis }",
+      result?.error
+        ? `The vision service could not answer: ${result.error}`
+        : "The vision service returned an unexpected response; it must answer { ok: true, analysis } or { success: true, text }",
     );
-  return result.analysis;
+  return answer;
 }

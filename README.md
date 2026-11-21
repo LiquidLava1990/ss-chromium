@@ -175,8 +175,10 @@ Set `SS_CHROMIUM_VISION_URL` to an image-description service (for example a
 ss-chromium vision screenshot.png "What does this chart show?"
 ```
 
-The service receives `POST {"image": "<base64>", "prompt": "…"}` and answers
-`{"ok": true, "analysis": "…"}`. Unset (the default), nothing is sent anywhere.
+The service receives `POST {"image_base64": "<base64>", "image": "<same>", "prompt": "…"}`
+(CrawlRX's `/vision/analyze` reads `image_base64`) and answers either CrawlRX's
+`{"success": true, "text": "…"}` or `{"ok": true, "analysis": "…"}`. Unset (the default),
+nothing is sent anywhere.
 
 ## Commands and settings
 
