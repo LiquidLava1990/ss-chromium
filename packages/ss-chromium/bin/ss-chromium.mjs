@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 // ss-chromium: MCP server (default), installer and diagnostics. Every command is non-interactive.
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -106,6 +108,28 @@ const COMMANDS = {
   install,
   launch: async () => {
     const browser = await ensureBrowser();
+    const client = new Client({
+      name: "ss-chromium-desktop",
+      version: VERSION,
+    });
+    try {
+      await client.connect(
+        new StdioClientTransport({
+          command: process.execPath,
+          args: [process.argv[1], "mcp"],
+          env: process.env,
+        }),
+      );
+      // Listing tools starts the relay without creating a conversation window.
+      const { tools } = await client.listTools({}, { timeout: 25000 });
+      if (!tools.some((tool) => tool.name === "browser")) {
+        throw new Error(
+          "The SS Chromium relay did not advertise browser control",
+        );
+      }
+    } finally {
+      await client.close();
+    }
     console.log(`SS Chromium is running. Profile: ${browser.profile}`);
   },
   doctor,

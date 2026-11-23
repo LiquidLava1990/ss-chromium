@@ -9,7 +9,7 @@ import http from "node:http";
 import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import WebSocket from "ws";
 
 import { RELAY_PORTS } from "@browsermcp/protocol";
@@ -27,6 +27,7 @@ import {
   devExtensionIdsPath,
   identityPath,
 } from "@/daemon/paths";
+import { FakeChromium, FakeExtension } from "@/testing/fake-extension";
 import { createStubEngine } from "@/testing/stub-engine";
 
 let home: string;
@@ -263,6 +264,28 @@ describe("startDaemon", () => {
     expect(engine.sessions.size).toBe(0);
     expect(await fetchStatus(port)).toBeNull();
     expect(readDaemonInfo(daemonInfoPath(home, port))).toBeNull();
+  });
+
+  it("keeps the SS relay alive until its browser disconnects", async () => {
+    const chromium = await FakeChromium.launch();
+    vi.stubEnv("SS_CHROMIUM_SESSION_ID", "test-session");
+    try {
+      const port = await freePort();
+      const daemon = await start({ port, idleExitMs: 500 });
+      const extension = await FakeExtension.connect({ port, chromium });
+      try {
+        expect(daemon.backend.connected).toBe(true);
+        await new Promise((resolve) => setTimeout(resolve, 650));
+        expect(await fetchStatus(port)).not.toBeNull();
+      } finally {
+        await extension.close();
+      }
+      expect(await daemon.stopped).toBe("idle");
+      expect(await fetchStatus(port)).toBeNull();
+    } finally {
+      vi.unstubAllEnvs();
+      await chromium.close();
+    }
   });
 });
 

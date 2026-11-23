@@ -112,16 +112,27 @@ export async function startDaemon(options: DaemonOptions): Promise<Daemon> {
   let stopping: Promise<void> | null = null;
   let resolveStopped: (reason: string) => void = () => {};
   const stopped = new Promise<string>((resolve) => (resolveStopped = resolve));
+  const keepRelayWhileBrowserConnected = Boolean(
+    process.env.SS_CHROMIUM_SESSION_ID,
+  );
 
   const startIdleTimer = () => {
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
-      if (sessions.size === 0) {
+      if (
+        sessions.size === 0 &&
+        !(keepRelayWhileBrowserConnected && backend.connected)
+      ) {
         void stop("idle");
       }
     }, options.idleExitMs ?? IDLE_EXIT_MS);
     idleTimer.unref?.();
   };
+  if (keepRelayWhileBrowserConnected) {
+    backend.on("connection", ({ connected }) => {
+      if (!connected && sessions.size === 0 && !stopping) startIdleTimer();
+    });
+  }
 
   const onClient = (ws: WebSocket) => {
     const timeout = setTimeout(() => ws.close(1008, "Expected hello"), 10_000);
