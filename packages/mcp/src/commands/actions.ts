@@ -364,20 +364,40 @@ export async function moveCursor(page: Page, x: number, y: number) {
       ([x, y]) => {
         const id = "__browsermcp_cursor";
         let host = document.getElementById(id);
-        if (!host) {
+        if (!host?.hasAttribute("data-cursor-dom")) {
+          const previous = host;
           host = document.createElement("browsermcp-cursor");
           host.id = id;
           host.setAttribute("aria-hidden", "true");
+          host.setAttribute("data-cursor-dom", "");
           host.style.cssText =
             "position:fixed;left:0;top:0;width:0;height:0;z-index:2147483647;pointer-events:none;transition:transform 300ms ease-out;";
           host.style.transform = `translate(${x}px, ${y}px)`;
-          host.attachShadow({ mode: "closed" }).innerHTML = `
-            <style>
-              .arrow { position:absolute; left:-3px; top:-3px; filter:drop-shadow(0 2px 3px rgba(0,0,0,.45)) drop-shadow(0 0 6px rgba(37,99,235,.9)); }
-              .label { position:absolute; left:22px; top:26px; padding:3px 9px; border-radius:999px; background:#2563eb; color:#fff; font:600 12px/16px system-ui,-apple-system,sans-serif; white-space:nowrap; border:1.5px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.35); }
-            </style>
-            <svg class="arrow" width="30" height="36" viewBox="0 0 20 24"><path d="M1 1 L1 19 L6 14.5 L9.5 22 L12.5 20.7 L9 13.3 L15.5 13 Z" fill="#2563eb" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            <div class="label">SS Chromium</div>`;
+          // Build the overlay without HTML or stylesheet text that a site can expose.
+          const svg = "http://www.w3.org/2000/svg";
+          const arrow = document.createElementNS(svg, "svg");
+          arrow.setAttribute("width", "30");
+          arrow.setAttribute("height", "36");
+          arrow.setAttribute("viewBox", "0 0 20 24");
+          arrow.style.cssText =
+            "position:absolute;left:-3px;top:-3px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.45)) drop-shadow(0 0 6px rgba(37,99,235,.9));";
+          const path = document.createElementNS(svg, "path");
+          path.setAttribute(
+            "d",
+            "M1 1 L1 19 L6 14.5 L9.5 22 L12.5 20.7 L9 13.3 L15.5 13 Z",
+          );
+          path.setAttribute("fill", "#2563eb");
+          path.setAttribute("stroke", "#fff");
+          path.setAttribute("stroke-width", "1.6");
+          path.setAttribute("stroke-linejoin", "round");
+          arrow.appendChild(path);
+
+          const label = document.createElement("div");
+          label.textContent = "SS Chromium";
+          label.style.cssText =
+            "position:absolute;left:22px;top:26px;padding:3px 9px;border-radius:999px;background:#2563eb;color:#fff;font:600 12px/16px system-ui,-apple-system,sans-serif;white-space:nowrap;border:1.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);";
+          host.attachShadow({ mode: "closed" }).append(arrow, label);
+          previous?.remove();
           document.documentElement.appendChild(host);
         }
         host.style.transform = `translate(${x}px, ${y}px)`;
